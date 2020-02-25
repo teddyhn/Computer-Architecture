@@ -4,6 +4,7 @@ import sys
 
 LDI = 0b10000010
 PRN = 0b01000111
+MUL = 0b10100010
 HLT = 0b00000001
 
 class CPU:
@@ -96,6 +97,11 @@ class CPU:
             elif op == PRN:
                 print(self.reg[operand_a])
                 self.pc += 2
+            elif op == MUL:
+                a = self.reg[operand_a]
+                b = self.reg[operand_b]
+                self.reg[operand_a] = a * b
+                self.pc += 3
             else:
                 print("Unrecognized operation.")
                 sys.exit(1)
