@@ -15,6 +15,27 @@ class CPU:
         self.reg = [0] * 8
         self.ram = [0] * 256   
         self.pc = 0
+        self.dispatch_table = {
+            LDI: self.LDI_op,
+            PRN: self.PRN_op,
+            MUL: self.MUL_op,
+            HLT: self.HLT_op
+        }
+
+    def LDI_op(self, operand_a, operand_b):
+        self.reg[operand_a] = operand_b
+        self.pc += 3
+
+    def PRN_op(self, operand_a, operand_b):
+        print(self.reg[operand_a])
+        self.pc += 2
+
+    def MUL_op(self, operand_a, operand_b):
+        self.reg[operand_a] = self.reg[operand_a] * self.reg[operand_b]
+        self.pc += 3
+
+    def HLT_op(self, operand_a, operand_b):
+        sys.exit(0)
 
     def ram_read(self, mar):
         mdr = self.ram[mar]
@@ -89,19 +110,8 @@ class CPU:
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
-            if op == HLT:
-                sys.exit(0)
-            elif op == LDI:
-                self.reg[operand_a] = operand_b
-                self.pc += 3
-            elif op == PRN:
-                print(self.reg[operand_a])
-                self.pc += 2
-            elif op == MUL:
-                a = self.reg[operand_a]
-                b = self.reg[operand_b]
-                self.reg[operand_a] = a * b
-                self.pc += 3
+            if int(bin(op), 2) in self.dispatch_table:
+                self.dispatch_table[op](operand_a, operand_b)
             else:
                 print("Unrecognized operation.")
                 sys.exit(1)
