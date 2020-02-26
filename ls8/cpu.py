@@ -6,6 +6,10 @@ LDI = 0b10000010
 PRN = 0b01000111
 MUL = 0b10100010
 HLT = 0b00000001
+PUSH = 0b01000101
+POP = 0b01000110
+
+SP = 7
 
 class CPU:
     """Main CPU class."""
@@ -19,7 +23,9 @@ class CPU:
             LDI: self.LDI_op,
             PRN: self.PRN_op,
             MUL: self.MUL_op,
-            HLT: self.HLT_op
+            HLT: self.HLT_op,
+            PUSH: self.PUSH_op,
+            POP: self.POP_op
         }
 
     def LDI_op(self, operand_a, operand_b):
@@ -36,6 +42,25 @@ class CPU:
 
     def HLT_op(self, operand_a, operand_b):
         sys.exit(0)
+
+    def PUSH_op(self, operand_a, operand_b):
+        self.push(self.reg[operand_a])
+        self.pc += 2
+
+    def POP_op(self, operand_a, operand_b):
+        self.reg[operand_a] = self.pop()
+        self.pc += 2
+
+    def push(self, value):
+        self.reg[SP] -= 1
+        self.ram_write(self.reg[SP], value)
+        print(f"PUSH reg[SP]: {self.reg[SP]}")
+
+    def pop(self):
+        value = self.ram_read(self.reg[SP])
+        self.reg[SP] += 1
+        print(f"POP reg[SP]: {self.reg[SP]}")
+        return value
 
     def ram_read(self, mar):
         mdr = self.ram[mar]
