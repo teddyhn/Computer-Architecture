@@ -4,10 +4,13 @@ import sys
 
 LDI = 0b10000010
 PRN = 0b01000111
+ADD = 0b10100000
 MUL = 0b10100010
 HLT = 0b00000001
 PUSH = 0b01000101
 POP = 0b01000110
+CALL = 0b01010000
+RET = 0b00010001
 
 SP = 7
 
@@ -22,10 +25,13 @@ class CPU:
         self.dispatch_table = {
             LDI: self.LDI_op,
             PRN: self.PRN_op,
+            ADD: self.ADD_op,
             MUL: self.MUL_op,
             HLT: self.HLT_op,
             PUSH: self.PUSH_op,
-            POP: self.POP_op
+            POP: self.POP_op,
+            CALL: self.CALL_op,
+            RET: self.RET_op
         }
 
     def LDI_op(self, operand_a, operand_b):
@@ -35,6 +41,10 @@ class CPU:
     def PRN_op(self, operand_a, operand_b):
         print(self.reg[operand_a])
         self.pc += 2
+
+    def ADD_op(self, operand_a, operand_b):
+        self.alu('ADD', operand_a, operand_b)
+        self.pc += 3
 
     def MUL_op(self, operand_a, operand_b):
         self.alu("MUL", operand_a, operand_b)
@@ -50,6 +60,16 @@ class CPU:
     def POP_op(self, operand_a, operand_b):
         self.reg[operand_a] = self.pop()
         self.pc += 2
+
+    def CALL_op(self, operand_a, operand_b):
+        self.reg[SP] -= 1
+        self.ram[self.reg[SP]] = self.pc + 2
+        reg_call = self.ram[self.pc + 1]
+        self.pc = self.reg[reg_call]
+
+    def RET_op(self, operand_a, operand_b):
+        self.pc = self.ram[self.reg[SP]]
+        self.reg[SP] += 1
 
     def push(self, value):
         self.reg[SP] -= 1
